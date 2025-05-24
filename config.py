@@ -11,6 +11,7 @@ check_color = "yellow"
 
 move_history_box_color = "white"
 move_history_box_width = 18
+temp = 50 
 
 # --------------- Assets --------------- #
 asset_directory = pathlib.Path(__file__).parent / "assets" / "pieces"
