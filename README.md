@@ -8,8 +8,8 @@
 ```
 project/
 ├── gui.py             # GUI
-├── board.py           # Λογική
-├── config.py          # Ρυθμίσεις
+├── board.py           # Λογική παιχνιδιού
+├── config.py          # Ρυθμίσεις εμφάνισης
 ├── assets/
 │   └── pieces/        # Εικόνες για τα πιόνια (.png)
 ├── README.md
