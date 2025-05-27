@@ -1,6 +1,6 @@
 import pathlib
 
-# --------------- Board appearance --------------- #
+# --------------- Εμφανιση σκακιερας --------------- #
 game_title = "Chess Game"
 square_size = 100
 
@@ -12,9 +12,12 @@ check_color = "yellow"
 move_history_box_color = "white"
 move_history_box_width = 18
 
-# --------------- Assets --------------- #
+# --------------- Αρχεια εικονας --------------- #
+
+#Το path του φακελου που περιεχει τις εικονες των πιονιων
 asset_directory = pathlib.Path(__file__).parent / "assets" / "pieces"
 
+# Κωδικοι εικονων για τα πιονια (χρησιμοποιουνται για την φορτωση εικονων)
 piece_codes = [
     "wP", "wR", "wN", "wB", "wQ", "wK",
     "bP", "bR", "bN", "bB", "bQ", "bK",
