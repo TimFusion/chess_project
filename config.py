@@ -9,6 +9,8 @@ dark_color = "#b58863"
 highlight_color = "red"
 check_color = "yellow"
 
+blink_time_when_king_in_check = 300 # (100ms = 0.1 second)
+
 move_history_box_color = "white"
 move_history_box_width = 18
 
