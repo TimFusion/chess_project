@@ -1,13 +1,3 @@
-#
-#
-#
-# Δεν εχω προσθεση σχολια εδω ακομα, αυριο :)
-#
-#
-#
-#
-
-
 import tkinter as tk
 from tkinter import messagebox, filedialog
 from pathlib import Path
@@ -15,19 +5,25 @@ from PIL import Image, ImageTk
 from board import Board, Color, PieceType
 import config
 
-GT = config.game_title
-SQ = config.square_size
-LC = config.light_color
-DC = config.dark_color
-MHBC = config.move_history_box_color
-MHBW = config.move_history_box_width
-HC = config.highlight_color
-CC = config.check_color
-PC = config.piece_codes
-DIR = Path(config.asset_directory)
+# ------------------------------------------------------------------------ #
+# Συντομες μεταβλητες (απο το config)
+# ------------------------------------------------------------------------ #
+GT = config.game_title # Τιτλος παιχνιδιου
+SQ = config.square_size # Μεγεθος τετραγωνου σκακιερας
+LC = config.light_color # Χρωμα ανοιχτου τετραγωνου
+DC = config.dark_color # Χρωμα σκουρου τετραγωνου
+MHBC = config.move_history_box_color # Χρωμα πλαισιου ιστορικου κινησεων
+MHBW = config.move_history_box_width # Πλατος πλαισιου ιστορικου κινησεων
+HC = config.highlight_color # Χρωμα επισημανσης
+CC = config.check_color # Χρωμα για το σαχ
+BT = config.blink_time_when_king_in_check # Διαρκεια χρονου (ms) blink οταν ο βασιλιας βρισκεται σε σαχ
+PC = config.piece_codes # Κωδικοι εικονων πιονιων
+DIR = Path(config.asset_directory) # Path φακελου με τις εικονες
 
-#load image pieces
-CODE = {
+# --------------------------------------------------------------------- #
+# Συσχετιση τυπου πιονιου και χρωματος με το αντιστοιχο ονομα εικονας
+# --------------------------------------------------------------------- #
+codes = {
     (Color.WHITE, PieceType.PAWN):   "wP",
     (Color.WHITE, PieceType.ROOK):   "wR",
     (Color.WHITE, PieceType.KNIGHT): "wN",
@@ -43,48 +39,50 @@ CODE = {
 }
 
 # ------------------------------------------------------------------ #
-#  GUI class
+#  GUI κλαση (γραφικο περιβαλλον)
 # ------------------------------------------------------------------ #
 class ChessGUI:
     def __init__(self, root: tk.Tk):
         self.root = root
         self.board = Board()
 
-        # main frame
+        # Δημιουργια βασικου πλαισιου παραθυρου
         self.frame = tk.Frame(root)
         self.frame.pack(fill=tk.BOTH)
 
-        # board frame
+        # Σκακιερα
         self.canvas = tk.Canvas(self.frame, width=SQ*8, height=SQ*8, highlightthickness=0)
         self.canvas.pack(side=tk.LEFT, fill=tk.Y)
         
-        # history box frame
+        # Πλαίσιο για το ιστορικο κινησεων
         self.history_frame = tk.Frame(self.frame)
         self.history_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # history box frame
+        # Κουτι κειμεου για εμφανιση των κινησεων
         self.history_box = tk.Text(self.history_frame, width=MHBW, state="disabled", bg=MHBC, font=("Consolas", 12), wrap="word")
         self.history_box.pack(fill=tk.BOTH, expand=True)
 
-        # history box scrollbar
+        # Scrollbar για το πλαισιο ιστορικου
         self.scrollbar = tk.Scrollbar(self.history_frame, command=self.history_box.yview)
         self.history_box.config(yscrollcommand=self.scrollbar.set)
 
+        # Μεταβλητες για σαχ - επιλογη τετραγωνου - επισημανση πιονιου
         self.blink_id = None
         self.blink_state = False
         self.check_square = None
         self.selected_sq = None
 
-        self.images = self.load_images()
-        self.draw_board()
-        self.draw_all_pieces()
-        self.canvas.bind("<Button-1>", self.on_click)
+        self.images = self.load_images() # Φορτωση πιονιων (εικονες)
+        self.draw_board() # Σχεδιαση ταμπλο
+        self.draw_all_pieces() # Τοποθετηση πιονιων
+        self.canvas.bind("<Button-1>", self.on_click) # Αντιδραση σε αριστερο click χρηστη
 
-        self.move_list = []
+        self.move_list = [] # Λιστα κινησεων
 
     # ------------------------------------------------------------------ #
     #  Image handling
     # ------------------------------------------------------------------ #
+    # Φορτωση των εικονων PNG για καθε πιονι στο λεξικο imgs με την σωστη συσχετιση τυπου-χρωματος-εικονας
     def load_images(self):
         imgs = {}
         for code in PC:
@@ -95,6 +93,7 @@ class ChessGUI:
     # ------------------------------------------------------------------ #
     #  Board drawing
     # ------------------------------------------------------------------ #
+    # Σχεδιαση του ταμπλο σκακιερας
     def draw_board(self):
         for r in range(8):
             for c in range(8):
@@ -103,6 +102,7 @@ class ChessGUI:
                 color = LC if (r+c) % 2 == 0 else DC
                 self.canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="")
 
+    # Σχεδιαση ολων των πιονιων πανω στην σκακιερα και εμφανιση σαχ (αν υπαρχει)
     def draw_all_pieces(self):
         self.canvas.delete("piece")
         self.canvas.delete("check")
@@ -132,28 +132,35 @@ class ChessGUI:
         if check_position:
             self.highlight_check(*check_position)
 
+    # Σχεδιαση ενος πιονιου στη σωστη θεση
     def draw_piece(self, piece):
         x = piece.col * SQ + SQ // 2
         y = piece.row * SQ + SQ // 2
-        code = CODE[(piece.color, piece.kind)]
+        code = codes[(piece.color, piece.kind)]
         self.canvas.create_image(x, y, image=self.images[code], tags=("piece",))
 
     # ------------------------------------------------------------------ #
     #  Event handling
     # ------------------------------------------------------------------ #
+    # Καλειται οταν ο χρηστης κανει κλικ σε τετραγωνο της σκακιερας
     def on_click(self, evt):
+        # Μετατροπη των συντεταγμενων του click σε θεση στη σκακιερα
         row, col = evt.y // SQ, evt.x // SQ
-        print(row, col)
+        # Αν υπαρχει ηδη επιλεγμενο πιονι, προσπαθουμε να το μετακινησουμε
         if self.selected_sq:
-            src_r, src_c = self.selected_sq
-            sel_piece = self.board.piece_at(src_r, src_c)
-            moved = self.board.move(src_r, src_c, row, col)
+            source_row, source_col = self.selected_sq
+            sel_piece = self.board.piece_at(source_row, source_col)
+            moved = self.board.move(source_row, source_col, row, col)
+            # Αφαιρουμε το highlight και μηδενιζουμε την τρεχουσα επιλογη
             self.canvas.delete("highlight")
             self.selected_sq = None
             if moved:
+                # Αν η κινηση ηταν επιτυχης, ανανεωνουμε τα πιονια
                 self.draw_all_pieces()
-                move_str = self.format_move(sel_piece, src_r, src_c, row, col)
+                # Καταγραφουμε την κινηση στο ιστορικο
+                move_str = self.format_move(sel_piece, row, col)
                 self.append_move_to_history(move_str)
+                # Ελεγχος για ματ ή πατ
                 if not self.board.has_legal_moves(self.board.turn):
                     if self.board.king_in_check(self.board.turn):
                         message = f"Checkmate - {self.board.turn.opposite.name} won"
@@ -162,39 +169,43 @@ class ChessGUI:
                     tk.messagebox.showinfo("Game Over", message)
                     self.reset_game()
             else:
+                # Αν η κινηση δεν ηταν εγκυρη, προσπαθουμε να επιλεξουμε νεο πιονι
                 self.try_select(row, col)
         else:
+            # Αν δεν εχει επιλεγει ακομη κομματι, προσπαθουμε να επιλεξουμε
             self.try_select(row, col)
-
+    
+    # Επιλογη κομματιου για μετακινηση
     def try_select(self, row, col):
         piece = self.board.piece_at(row, col)
+        # Ελεγχει αν υπαρχει πιονι και αν ανηκει στον παιχτη που παιζει
         if piece and piece.color is self.board.turn:
             self.selected_sq = (row, col)
             self.highlight_square(row, col)
 
     # ------------------------------------------------------------------ #
-    #  Extra
+    #  Extras
     # ------------------------------------------------------------------ #
-    # ---------------- Highlight square ---------------- #
+    # Επισημανση επιλεγμενου τετραγωνου
     def highlight_square(self, row, col):
         x1, y1 = col * SQ, row * SQ
         x2, y2 = x1 + SQ, y1 + SQ
         self.canvas.create_rectangle(x1, y1, x2, y2, outline=HC, width=2, tags="highlight")
 
-    # ---------------- Highlight check ---------------- #
+    # Επισημανση σαχ στον βασιλια
     def highlight_check(self, row, col):
         x1, y1 = col * SQ, row * SQ
         x2, y2 = x1 + SQ, y1 + SQ
         self.canvas.create_rectangle(x1, y1, x2, y2, outline=CC, width=2, tags="check")
 
-    # ---------------- Start blink ---------------- #
+    # Εναρξη blink οταν ο βασιλιας ειναι σε σαχ
     def start_check_blink(self):
         if self.blink_id:
             return
         if self.check_square:
             self.blink()
 
-    # ---------------- Stop blink ---------------- #
+    # Τερματισμος blink
     def stop_check_blink(self):
         if self.blink_id:
             self.canvas.delete("check")
@@ -203,7 +214,7 @@ class ChessGUI:
             self.blink_state = False
             self.check_square = None
             
-    # ---------------- Check blink ---------------- #
+    # Blink του τετραγωνου του βασιλια οταν βρισκεται σε σαχ
     def blink(self):
         if not self.check_square:
             self.stop_check_blink()
@@ -214,12 +225,13 @@ class ChessGUI:
             r, c = self.check_square
             self.highlight_check(r, c)
         self.blink_state = not self.blink_state
-        self.blink_id = self.root.after(300, self.blink)
+        self.blink_id = self.root.after(BT, self.blink)
 
-    # ---------------- Format move ---------------- #
-    def format_move(self, piece, src_r, src_c, dst_r, dst_c):
+    # Μορφοποιηση κινησης σε μορφη (π.χ. Qd5, e4)
+    def format_move(self, piece, dst_r, dst_c):
         c = "abcdefgh"
         r = "87654321"
+
         name = {
             PieceType.KING: "K",
             PieceType.QUEEN: "Q",
@@ -233,11 +245,10 @@ class ChessGUI:
 
         return name + dst
     
-    # ---------------- Add move to history box---------------- #
+    # Ενημερωση του ιστορικου κινησεων
     def append_move_to_history(self, move_str):
         self.move_list.append(move_str)
 
-        # Format into lines like: 1. e4 e5
         self.history_box.config(state="normal")
         self.history_box.delete("1.0", tk.END)
 
@@ -252,7 +263,7 @@ class ChessGUI:
         self.history_box.see(tk.END)
         self.history_box.config(state="disabled")
 
-    # ---------------- Download move history ---------------- #
+    # Αποθηκευση κινησεων σε αρχειο κειμενου
     def save_move_history(self):
         if not self.move_list:
             return
@@ -276,7 +287,7 @@ class ChessGUI:
             with open(file_path, "w") as f:
                 f.write(content)
 
-    # ---------------- Reset game ---------------- #
+    # Επαναφορα παιχνιδιου
     def reset_game(self):
         if self.move_list:
             answer = messagebox.askyesno("Save Game History", "Do you want to download the move history?")
@@ -293,7 +304,9 @@ class ChessGUI:
         self.history_box.delete("1.0", tk.END)
         self.history_box.config(state="disabled")
 
-# ---------------- Main ---------------- #
+# ------------------------------------------------------------------ #
+#  Εκκινηση του παιχνιδιου (main)
+# ------------------------------------------------------------------ #
 if __name__ == "__main__":
     root = tk.Tk()
     root.title(GT)
