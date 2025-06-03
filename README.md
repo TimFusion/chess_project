@@ -18,12 +18,17 @@ project/
 
 ▶️ Εκτέλεση
 
-1. Εγκατέστησε τις απαιτήσεις (κοιτάξτε `requirements.txt`):
+1. Βεβαιωθείτε ότι έχετε εγκατεστημένη την Python (έκδοση 3.7 ή νεότερη):
     ```bash
-    pip install pillow
+    python --version
     ```
 
-2. Βεβαιωθείται πως είστε στο σωστό path (C:\Users\User\Desktop\project) και τρέξτε στο terminal:
+1. Εγκαταστήστε τις απαιτούμενες βιβλιοθήκες:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+2. Βεβαιωθείται πως είστε στον σωστό φάκελο (C:\Users\User\Desktop\project) και τρέξτε:
     ```bash
     python gui.py
     ```
