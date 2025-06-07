@@ -264,7 +264,7 @@ class ChessGUI:
         self.history_box.config(state="disabled")
 
     # Αποθηκευση κινησεων σε αρχειο κειμενου
-    def save_move_history(self):
+    def download_move_history(self):
         if not self.move_list:
             return
 
@@ -292,7 +292,7 @@ class ChessGUI:
         if self.move_list:
             answer = messagebox.askyesno("Save Game History", "Do you want to download the move history?")
             if answer:
-                self.save_move_history()
+                self.download_move_history()
         self.board = Board()
         self.selected_sq = None
         self.canvas.delete("highlight")
