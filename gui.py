@@ -163,10 +163,10 @@ class ChessGUI:
                 # Ελεγχος για ματ ή πατ
                 if not self.board.has_legal_moves(self.board.turn):
                     if self.board.king_in_check(self.board.turn):
-                        message = f"Checkmate - {self.board.turn.opposite.name} won"
+                        message = f"Ματ - {self.board.turn.opposite.name} νικησαν"
                     else:
-                        message = "Stalemate - draw"
-                    tk.messagebox.showinfo("Game Over", message)
+                        message = "Αδιέξοδο - Ισοπαλία"
+                    tk.messagebox.showinfo("Λήξη Παιχνιδιού", message)
                     self.reset_game()
             else:
                 # Αν η κινηση δεν ηταν εγκυρη, προσπαθουμε να επιλεξουμε νεο πιονι
@@ -280,7 +280,7 @@ class ChessGUI:
         file_path = filedialog.asksaveasfilename(
             defaultextension=".txt",
             filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")],
-            title="Save Game History"
+            title="Αποθήκευση Ιστορικού Παιχνιδιού"
         )
 
         if file_path:
@@ -290,7 +290,7 @@ class ChessGUI:
     # Επαναφορα παιχνιδιου
     def reset_game(self):
         if self.move_list:
-            answer = messagebox.askyesno("Save Game History", "Do you want to download the move history?")
+            answer = messagebox.askyesno("Αποθήκευση Ιστορικού Παιχνιδιού", "Θέλετε να κατεβάσετε το ιστορικό κινήσεων?")
             if answer:
                 self.download_move_history()
         self.board = Board()
