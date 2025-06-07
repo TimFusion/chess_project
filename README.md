@@ -13,7 +13,8 @@ project/
 ├── assets/
 │   └── pieces/        # Εικόνες για τα πιόνια (.png)
 ├── README.md
-└── requirements.txt
+├── requirements.txt
+└── .gitignore
 ```
 
 ▶️ Εκτέλεση
