@@ -146,7 +146,6 @@ class ChessGUI:
     def on_click(self, evt):
         # Μετατροπη των συντεταγμενων του click σε θεση στη σκακιερα
         row, col = evt.y // SQ, evt.x // SQ
-        print(evt.y, evt.x)
         # Αν υπαρχει ηδη επιλεγμενο πιονι, προσπαθουμε να το μετακινησουμε
         if self.selected_sq:
             source_row, source_col = self.selected_sq
